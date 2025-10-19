@@ -1,17 +1,16 @@
 import p5 from "p5";
-import { Walker } from "./Wolker";
+import registry, { listSketchKeys } from "./sketches/registry";
 
-new p5((p: p5) => {
-  let walker : Walker;
+const params = new URLSearchParams(location.search);
+const name = params.get("sketch") ?? listSketchKeys()[0];
+const sketch = registry[name as keyof typeof registry];
 
-  p.setup = () => {
-    p.createCanvas(640, 240);
-    walker = new Walker(p);
-    p.background(255);
-  };
-
-  p.draw = () => {
-    walker.step();
-    walker.show();
-  };
-});
+if (!sketch) {
+  document.body.innerHTML =
+    `<div style="font-family:system-ui;padding:20px">
+       <h2>Sketch not found: ${name}</h2>
+       <p>Try: ${listSketchKeys().map(k=>`<code>?sketch=${k}</code>`).join(", ")}</p>
+     </div>`;
+} else {
+  new p5(sketch);
+}
